@@ -1,109 +1,131 @@
 package com.example.yummybites.screens.profile
 
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
+import androidx.compose.material.*
+
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
+
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.example.yummybites.R
+import com.example.yummybites.model.User
+import com.example.yummybites.navigation.YummyBitesScreens
 
-//class ProfileViewModel : ViewModel() {
-//    // ViewModel logic for managing profile data and saving to Firebase
-//}
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-
+@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
-fun ProfileScreen() {
-    var isEditing by remember { mutableStateOf(false) }
-    var name by remember { mutableStateOf("John Doe") }
-    var email by remember { mutableStateOf("johndoe@example.com") }
-    // Add more fields as needed (age, etc.)
+fun ProfileScreen(navController: NavController, viewModel: ProfileScreenViewModel = hiltViewModel()) {
+    var user by remember { mutableStateOf(User("", "", "")) }
+
+    LaunchedEffect(Unit) {
+        viewModel.getUserDetails()
+        viewModel.userDetails.collect { userDetails ->
+            if (userDetails != null) {
+                // Extract values directly from userDetails Map
+                val name = userDetails["username"] as? String ?: ""
+                val email = userDetails["email"] as? String ?: ""
+                val phone = userDetails["phone"] as? String ?: ""
+
+                // Create a User object if needed
+                user = User(name, email, phone)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+            .padding(16.dp)
     ) {
         // Profile Image
-        ProfileImage(isEditing = isEditing, onImageSelected = {
-            // Handle image selection logic here
-        })
-
-        // Profile Details
-        ProfileDetailItem(label = "Name", value = name, isEditing = isEditing) {
-            name = it
-        }
-        ProfileDetailItem(label = "Email", value = email, isEditing = isEditing) {
-            email = it
-        }
-        // Add more ProfileDetailItems for other fields
-
-        // Edit/Save Button
-        IconButton(
-            onClick = {
-                if (isEditing) {
-                    // Save data to Firebase
-                    //viewModel.saveProfileData(name, email, /* other fields */)
-                }
-                isEditing = !isEditing
-            }
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .align(Alignment.CenterHorizontally)
         ) {
-            Icon(
-                imageVector = if (isEditing) Icons.Default.Save else Icons.Default.Edit,
-                contentDescription = if (isEditing) "Save" else "Edit"
+            // You can load the image from the drawable or any URL
+            Image(
+                painter = painterResource(id = R.drawable.profile),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
             )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // User Details
+        LazyColumn {
+            item {
+                // Check if userDetails is not null before accessing its properties
+                ProfileItem("Name", user.username)
+                ProfileItem("Email", user.email)
+                ProfileItem("Phone", user.phone)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Logout Button
+        Button(
+            onClick = {
+                FirebaseAuth.getInstance().signOut()
+                navController.navigate(YummyBitesScreens.LoginScreen.name) // Navigate to your login screen
+            },
+            modifier = Modifier.fillMaxWidth().padding(23.dp)
+        ) {
+            Text(text = "Sign Out")
         }
     }
 }
 
 @Composable
-fun ProfileImage(isEditing: Boolean, onImageSelected: () -> Unit) {
-    // Profile image logic, allow image selection in editing mode
-}
-
-@Composable
-fun ProfileDetailItem(label: String, value: String, isEditing: Boolean, onValueChange: (String) -> Unit) {
-    if (isEditing) {
-        BasicTextField(
-            value = value,
-            onValueChange = {
-                onValueChange(it)
-            },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    // Handle keyboard done action if needed
-                }
-            ),
-            textStyle = TextStyle(fontSize = 18.sp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
-    } else {
+fun ProfileItem(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
-            text = "$label: $value",
-            style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp),
+            text = label,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .weight(1f)
+                .padding(end = 8.dp),
+            style = TextStyle(
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = MaterialTheme.colors.primary
+            )
+        )
+
+        Text(
+            text = value,
+            style = TextStyle(
+                fontSize = 16.sp,
+                color = Color.Gray
+            )
         )
     }
 }

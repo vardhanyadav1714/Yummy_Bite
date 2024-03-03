@@ -1,5 +1,7 @@
 package com.example.yummybites.navigation
 
+ 
+
 import YourMainScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
@@ -7,9 +9,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.yummybites.PasswordCodeScreen
 import com.example.yummybites.R
+import com.example.yummybites.screens.SignUpScreen
 import com.example.yummybites.screens.YummyBitesSplashScreen
 import com.example.yummybites.screens.login.YummyBitesLoginScreen
+import com.example.yummybites.screens.payments.PaymentsScreen
+
 import com.example.yummybites.screens.update.RecoverPassword
+
 
 @Composable
 fun YummyBitesNavigation() {
@@ -36,7 +42,13 @@ fun YummyBitesNavigation() {
         }
         composable(YummyBitesScreens.BottomNavigationScreen.name) {
            // val yummybitesAction=YummyBitesActions(navController=navController)
-            YourMainScreen()
+            YourMainScreen(navctl=navController)
         }
+
+       composable(YummyBitesScreens.SignUpScreen.name){
+           val imagg1= R.drawable.aa
+           val imagg2= R.drawable.bb
+           SignUpScreen( image1 = imagg1, image2 = imagg2,navController = navController)
+       }
     }
 }

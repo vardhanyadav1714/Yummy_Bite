@@ -1,37 +1,30 @@
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.yummybites.PasswordCodeScreen
-import com.example.yummybites.R
-import com.example.yummybites.navigation.YummyBitesScreens
-import com.example.yummybites.screens.Favorites.FavoritesScreen
-import com.example.yummybites.screens.cart.CartScreen
+import androidx.navigation.navArgument
 import com.example.yummybites.screens.home.YummyBitesHomeScreen
+import com.example.yummybites.navigation.YummyBitesScreens
+
+import com.example.yummybites.screens.OrderScreen
+import com.example.yummybites.screens.cart.CartScreen
+import com.example.yummybites.screens.payments.PaymentsScreen
 import com.example.yummybites.screens.profile.ProfileScreen
-import com.example.yummybites.screens.update.RecoverPassword
 
 class YummyBitesActions(navController: NavController) {
     val openLogin: () -> Unit = {
@@ -49,14 +42,14 @@ class YummyBitesActions(navController: NavController) {
 }
 
 @Composable
-fun YourMainScreen() {
+fun YourMainScreen(navctl:NavController) {
     val navController = rememberNavController()
 
     val bottomNavigationScreens = listOf(
         YummyBitesScreens.HomeScreen.name,
         YummyBitesScreens.CartScreen.name,
-        YummyBitesScreens.ProfileScreen.name,
-        YummyBitesScreens.FavoriteScreen.name
+        YummyBitesScreens.OrderScreen.name,
+        YummyBitesScreens.ProfileScreen.name
     )
     val darkCyanColor = Color(0xFF008B8B)
     Scaffold(
@@ -113,17 +106,29 @@ fun YourMainScreen() {
             // Content for the current screen
             NavHost(navController = navController, startDestination = YummyBitesScreens.HomeScreen.name) {
                 composable(YummyBitesScreens.HomeScreen.name) {
+
                     YummyBitesHomeScreen(navController)
                 }
-                composable(YummyBitesScreens.FavoriteScreen.name) {
-                    FavoritesScreen()
+                composable(YummyBitesScreens.OrderScreen.name) {
+                      OrderScreen()
                 }
                 composable(YummyBitesScreens.CartScreen.name) {
-                    CartScreen()
+                    CartScreen(navController)
                 }
                 composable(YummyBitesScreens.ProfileScreen.name) {
-                    ProfileScreen()
+                    ProfileScreen(navController=navctl)
                 }
+
+                composable(
+                    route = "${YummyBitesScreens.PaymentScreen.name}/{totalAmount}",
+                    arguments = listOf(navArgument("totalAmount") { type = NavType.FloatType })
+                ) { entry ->
+                    val totalAmount = entry.arguments?.getFloat("totalAmount")?.toDouble() ?: 0.0
+                    PaymentsScreen(totalAmount)
+                }
+
+
+
             }
         }
     }
@@ -150,7 +155,7 @@ class BottomNavigationInfo(val screen: YummyBitesScreens,val icon:ImageVector,va
 fun provideName(name: String): String {
     return when (name) {
         YummyBitesScreens.HomeScreen.name -> "Home"
-        YummyBitesScreens.FavoriteScreen.name -> "Favorite"
+        YummyBitesScreens.OrderScreen.name -> "Orders"
         YummyBitesScreens.CartScreen.name -> "Cart"
         YummyBitesScreens.ProfileScreen.name -> "Profile"
         else -> "Home"
@@ -161,7 +166,7 @@ fun provideName(name: String): String {
 fun provideIcon(name: String): ImageVector {
     return when (name) {
         YummyBitesScreens.HomeScreen.name -> Icons.Default.Home
-        YummyBitesScreens.FavoriteScreen.name -> Icons.Default.Favorite
+        YummyBitesScreens.OrderScreen.name -> Icons.Default.List
         YummyBitesScreens.CartScreen.name -> Icons.Default.ShoppingCart
         YummyBitesScreens.ProfileScreen.name -> Icons.Default.Person
         else -> Icons.Default.Home

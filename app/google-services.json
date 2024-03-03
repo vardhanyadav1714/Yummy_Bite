@@ -1,13 +1,32 @@
 {
   "project_info": {
-    "project_number": "238668653240",
-    "project_id": "yummy-bites-37dd8",
-    "storage_bucket": "yummy-bites-37dd8.appspot.com"
+    "project_number": "1039254950320",
+    "project_id": "yummy-bite-admin",
+    "storage_bucket": "yummy-bite-admin.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:238668653240:android:5b2d75d87abefdb3f08a4d",
+        "mobilesdk_app_id": "1:1039254950320:android:0c5f8f288c8c0382d30675",
+        "android_client_info": {
+          "package_name": "com.example.yummybiteadmin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPNkiiw4yJ7A3fUnFfkAAjVeoTThiPgy8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1039254950320:android:0aecd67b28e2254fd30675",
         "android_client_info": {
           "package_name": "com.example.yummybites"
         }
@@ -15,7 +34,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDs7THcRjiNB1AGAh_5fXDvz844TcdY3u0"
+          "current_key": "AIzaSyBPNkiiw4yJ7A3fUnFfkAAjVeoTThiPgy8"
         }
       ],
       "services": {
