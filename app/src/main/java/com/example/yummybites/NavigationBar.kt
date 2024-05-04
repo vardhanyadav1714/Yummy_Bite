@@ -11,6 +11,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -18,11 +19,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.yummybites.Order
+import com.example.yummybites.OrderTpe
 import com.example.yummybites.screens.home.YummyBitesHomeScreen
 import com.example.yummybites.navigation.YummyBitesScreens
 
 import com.example.yummybites.screens.OrderScreen
 import com.example.yummybites.screens.cart.CartScreen
+import com.example.yummybites.screens.home.DishViewModel
 import com.example.yummybites.screens.payments.PaymentsScreen
 import com.example.yummybites.screens.profile.ProfileScreen
 
@@ -59,8 +63,8 @@ fun YourMainScreen(navctl:NavController) {
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(2.dp))
                     .border(0.5.dp, color = Color.Cyan, shape = RoundedCornerShape(2.dp)),
-                backgroundColor = Color.White
-            ) {
+                backgroundColor = MaterialTheme.colors.background
+             ) {
                 bottomNavigationScreens.forEach { screen ->
                     val isSelected = currentRoute(navController) == screen
                     BottomNavigationItem(
@@ -109,8 +113,8 @@ fun YourMainScreen(navctl:NavController) {
 
                     YummyBitesHomeScreen(navController)
                 }
-                composable(YummyBitesScreens.OrderScreen.name) {
-                      OrderScreen()
+                composable(YummyBitesScreens.OrderScreen.name){
+                    OrderScreen()
                 }
                 composable(YummyBitesScreens.CartScreen.name) {
                     CartScreen(navController)
@@ -119,12 +123,15 @@ fun YourMainScreen(navctl:NavController) {
                     ProfileScreen(navController=navctl)
                 }
 
+
+
                 composable(
                     route = "${YummyBitesScreens.PaymentScreen.name}/{totalAmount}",
                     arguments = listOf(navArgument("totalAmount") { type = NavType.FloatType })
                 ) { entry ->
                     val totalAmount = entry.arguments?.getFloat("totalAmount")?.toDouble() ?: 0.0
-                    PaymentsScreen(totalAmount)
+                    val viewmodel : DishViewModel = hiltViewModel()
+                    PaymentsScreen(navController,viewmodel,totalAmount)
                 }
 
 

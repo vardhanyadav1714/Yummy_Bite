@@ -5,6 +5,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.yummybites.Order
 import com.example.yummybites.R
 import com.example.yummybites.model.User
 import com.example.yummybites.navigation.YummyBitesScreens
@@ -36,7 +39,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @Composable
 fun ProfileScreen(navController: NavController, viewModel: ProfileScreenViewModel = hiltViewModel()) {
     var user by remember { mutableStateOf(User("", "", "")) }
-
+    val previousOrders by viewModel.deliveredOrders.collectAsState(emptyList())
+    val isLoading by viewModel.isLoading.collectAsState()
+    LaunchedEffect(true){
+        viewModel.fetchDeliveredOrders()
+    }
     LaunchedEffect(Unit) {
         viewModel.getUserDetails()
         viewModel.userDetails.collect { userDetails ->
@@ -79,8 +86,8 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileScreenViewMode
         LazyColumn {
             item {
                 // Check if userDetails is not null before accessing its properties
-                ProfileItem("Name", user.username)
-                ProfileItem("Email", user.email)
+                ProfileItem("Email", user.username)
+                ProfileItem("UserName", user.email)
                 ProfileItem("Phone", user.phone)
             }
         }
@@ -93,9 +100,41 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileScreenViewMode
                 FirebaseAuth.getInstance().signOut()
                 navController.navigate(YummyBitesScreens.LoginScreen.name) // Navigate to your login screen
             },
-            modifier = Modifier.fillMaxWidth().padding(23.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(23.dp)
         ) {
             Text(text = "Sign Out")
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = "Previous Orders",
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(8.dp), style = TextStyle(fontWeight= FontWeight.Bold, fontSize = 18.sp)
+
+        )
+        if (isLoading) {
+            // Display circular progress indicator while loading
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(50.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+        } else if (previousOrders.isNotEmpty()) {
+            LazyColumn {
+                items(previousOrders) {
+                    OrderCard(it)
+                }
+            }
+        } else {
+            // Display a message when there are no delivered orders
+            Text(
+                text = "No previous orders found",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(8.dp)
+            )
         }
     }
 }
@@ -127,5 +166,71 @@ fun ProfileItem(label: String, value: String) {
                 color = Color.Gray
             )
         )
+    }
+}
+
+@Composable
+fun OrderCard(order: Order) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth().padding(5.dp),
+        elevation = 8.dp,
+        backgroundColor = MaterialTheme.colors.background,
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+
+            order.foodList.forEach { food ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+
+                        .padding(vertical = 8.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Text(
+                        text = "Ordered from :${order.vendorName}",
+                        style = MaterialTheme.typography.subtitle2,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colors.primary,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "${food.name} x ${food.quantity}",
+                            style = MaterialTheme.typography.subtitle1,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colors.onSurface
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = "₹${"%.2f".format(food.totalPrice)}",
+                            style = MaterialTheme.typography.body2,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colors.secondary
+                        )
+                    }
+
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+            Text(
+                text = "Total Amount: ₹${"%.2f".format(order.totalAmount)}",
+                style = MaterialTheme.typography.h6,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colors.secondary
+            )
+        }
     }
 }

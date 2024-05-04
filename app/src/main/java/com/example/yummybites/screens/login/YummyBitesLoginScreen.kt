@@ -1,46 +1,33 @@
 package com.example.yummybites.screens.login
 
-import android.annotation.SuppressLint
+import android.graphics.fonts.FontStyle
 import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.example.yummybites.R
 import com.example.yummybites.navigation.YummyBitesScreens
-import com.example.yummybites.screens.home.DishViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @Composable
 fun YummyBitesLoginScreen(
@@ -130,31 +117,40 @@ fun YummyBitesLoginScreen(
                 trailingIcon = {
                     IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                         Icon(
-                            imageVector = if (isPasswordVisible) ImageVector.vectorResource(R.drawable.baseline_remove_red_eye_24) else ImageVector.vectorResource(R.drawable.baseline_visibility_off_24),
+                            imageVector = if (isPasswordVisible) ImageVector.vectorResource(R.drawable.baseline_remove_red_eye_24) else ImageVector.vectorResource(R.drawable.visibilityoff),
                             contentDescription = "Password Visibility"
                         )
-
-
                     }
                 }
             )
-
+            val context= LocalContext.current
             Spacer(modifier = Modifier.height(16.dp))
 
             // Login Button
-            val isButtonEnabled = email.isNotBlank() && password.isNotBlank()
+            val isButtonEnabled = email.isNotBlank() && password.isNotBlank() && email.contains("@kiet.edu")
             RoundedButton(
                 text = "Login",
-                onClick = {
+                onClick = { if (isButtonEnabled){
                     viewModel.signInUserWithEmailAndPassword(email, password) {
                         navController.navigate(YummyBitesScreens.BottomNavigationScreen.name)
                     }
-                },
+                    }else{
+                        Toast.makeText(context,"Please enter valid email and password",Toast.LENGTH_SHORT).show()
+                }
 
+                }
+            )
+            Spacer(modifier=Modifier.height(6.dp))
+
+            Text(
+                text = "Forgot Password",
+                color = Color.Red,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                modifier = Modifier.clickable { navController.navigate(YummyBitesScreens.PasswordRecover.name) }
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
+            Spacer(modifier = Modifier.height(6.dp))
             Row(modifier = Modifier.align(Alignment.End)) {
                 Text(
                     text = "New User? ",
@@ -170,10 +166,12 @@ fun YummyBitesLoginScreen(
                     color = Color.Cyan,
                     fontSize = 14.sp
                 )
+
             }
         }
     }
 }
+
 @Composable
 fun RoundedButton(text: String, onClick: () -> Unit) {
     Button(

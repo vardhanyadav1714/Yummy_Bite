@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddShoppingCart
@@ -42,85 +44,87 @@ fun CartScreen(navController: NavController, cartViewModel: DishViewModel = hilt
 
     // Calculate total amount
     val totalAmount = cartItems.sumBy { it.totalPrice.toInt() }
+   if (cartItems.isEmpty()){
+       Column(
+           modifier = Modifier
+               .fillMaxSize()
+               .padding(16.dp),
+           verticalArrangement = Arrangement.Top
+       ) {
+           Text(text = "No Item in cart")
+       }
+   }
+    else {
+       Column(
+           modifier = Modifier
+               .fillMaxSize()
+               .padding(16.dp),
+           verticalArrangement = Arrangement.Top
+       ) {
+           if (loading) {
+               CircularProgressIndicator()
+           } else {
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Top
-    ) {
-        if (loading) {
-            CircularProgressIndicator()
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
 
-                    .weight(1f)
-            ) {
-                itemsIndexed(cartItems) { index, food ->
-                    CartItem(food = food, onRemoveItemClick = {
-                        cartViewModel.removeFromCart(food)
-                    }, onIncreaseClick = {
-                        cartViewModel.increaseQuantity(food)
-                    }, onDecreaseClick = {
-                        cartViewModel.decreaseQuantity(food)
-                    })
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-            }
+               LazyColumn(
+                   modifier = Modifier
+                       .fillMaxWidth()
 
-            // Display total amount
-            Text(
-                text = "Total Amount: ₹${totalAmount}",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = MaterialTheme.colors.onSurface
-            )
+                       .weight(1f)
+               ) {
+                   itemsIndexed(cartItems) { index, food ->
+                       CartItem(food = food, onRemoveItemClick = {
+                           cartViewModel.removeFromCart(food)
+                       }, onIncreaseClick = {
+                           cartViewModel.increaseQuantity(food)
+                       }, onDecreaseClick = {
+                           cartViewModel.decreaseQuantity(food)
+                       })
+                       Spacer(modifier = Modifier.height(8.dp))
+                   }
+               }
 
-            // Spacer to push total amount and buttons to the bottom
-            Spacer(modifier = Modifier.weight(1f))
+               // Display total amount
+               Text(
+                   text = "Total Amount: ₹${totalAmount}",
+                   modifier = Modifier
+                       .fillMaxWidth()
+                       .padding(bottom = 8.dp),
+                   fontWeight = FontWeight.Bold,
+                   fontSize = 18.sp,
+                   color = MaterialTheme.colors.onSurface
+               )
 
-            // Buttons
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Button(onClick = {
-                    cartViewModel.clearCart()
-                    cartViewModel.getCartItems()
-                }) {
-                    Text("Cancel")
-                }
+               // Spacer to push total amount and buttons to the bottom
+               Spacer(modifier = Modifier.weight(1f))
 
-                Button(onClick = { navController.navigate("${YummyBitesScreens.PaymentScreen}/$totalAmount")}) {
-                    Text("Proceed to Checkout")
-                }
-            }
-        }
-    }
+               // Buttons
+               Row(
+                   modifier = Modifier
+                       .fillMaxWidth()
+                       .padding(8.dp),
+                   horizontalArrangement = Arrangement.SpaceBetween
+               ) {
+                   if (totalAmount > 0) {
+                       Button(onClick = {
+                           cartViewModel.clearCart()
+                           cartViewModel.getCartItems()
+                       }) {
+                           Text("Cancel")
+                       }
+                   }
+                   if (totalAmount > 0) {
+                       Button(onClick = { navController.navigate("${YummyBitesScreens.PaymentScreen}/$totalAmount") }) {
+                           Text("Proceed to Checkout")
+                       }
+                   }
+               }
+           }
+       }
+   }
 }
 
-@Composable
-fun CartItemsList(cartItems: List<Food>, cartViewModel: DishViewModel = hiltViewModel()) {
-    LazyColumn {
-        itemsIndexed(cartItems) { index, food ->
-            CartItem(food = food, onRemoveItemClick = {
-                cartViewModel.removeFromCart(food)
-            }, onIncreaseClick = {
-                cartViewModel.increaseQuantity(food)
-            }, onDecreaseClick = {
-                cartViewModel.decreaseQuantity(food)
-            })
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
+
 @Composable
 fun CartItem(
     food: Food,
@@ -132,11 +136,11 @@ fun CartItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clip(Shapes.medium)
-            .border(0.25.dp, MaterialTheme.colors.primary),
-        elevation = 8.dp,
-        backgroundColor = MaterialTheme.colors.surface
-    ) {
+            .clip(Shapes.medium),
+        shape = RoundedCornerShape(corner = CornerSize(12.dp)),
+
+        elevation = 4.dp,
+     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

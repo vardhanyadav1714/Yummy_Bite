@@ -17,9 +17,11 @@ import androidx.compose.ui.unit.dp
 import com.example.yummybites.navigation.YummyBitesNavigation
 import com.example.yummybites.ui.theme.YummyBitesTheme
 import dagger.hilt.android.AndroidEntryPoint
+import dev.shreyaspatil.easyupipayment.listener.PaymentStatusListener
+import dev.shreyaspatil.easyupipayment.model.TransactionDetails
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), PaymentStatusListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -34,6 +36,14 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onTransactionCancelled() {
+
+    }
+
+    override fun onTransactionCompleted(transactionDetails: TransactionDetails) {
+
+     }
 }
 
 @Composable
